@@ -5,7 +5,7 @@ import shutil
 
 sys.argv.append(r'V:/working_dir/')
 callendar = ['May','June','July','August','September']
-year = '20'
+year = '_2020'
 my_name = 'John'
 spreadsheets = {'ext':('.xls', '.xlsx')}
 

@@ -4,8 +4,9 @@ from collections import defaultdict
 from itertools import repeat
 from operator import itemgetter
 
-sys.argv.append('E:\\impra\\')
+sys.argv.append('M:\\photos\\')
 count = 0
+count2 = 0
 flist = []
 tohash = []
 
@@ -29,13 +30,13 @@ for a in range(len(flist)-1):
         tohash.append(nlist)
 
         count+=1
-        #tohash = list(zip(flist, fsize))
+
         print('file {} = {}'.format(flist[::1][a][0], flist[::1][a+1][0]))
 
-print('total dups {}'.format(count))
-print(tohash)
+for b in range(len(tohash)-1): 
+    if tohash[::1][b][1] == tohash[::1][b+1][1]:
+        print('found chunk {} is equal to this file {}'.format(tohash[::1][b][0], tohash[::1][b+1][0]))
+        count2+=1
 
-#print(str(res)) 
-#print('\nDups: {}'.format(count))
-#print(flist[::2]) #['M:\\photos\\asiii\\IMG 1826.jpg', 'M:\\photos\\asiii\\IMG 1833.jpg'....]
-#print(flist[1::2]) #[49818, 49353, 48516, 50619...]
+print('total dups based on file size - {}'.format(count))
+print('total dups based on first 1024 bytes = {}'.format(count2))

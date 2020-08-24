@@ -2,13 +2,14 @@ import os, sys
 import os.path
 from itertools import repeat
 from operator import itemgetter
+import hashlib
 import time
 
-sys.argv.append('E:\\')
-count = 0
+
+sys.argv.append('E:\\photos\\')
+
 count2 = 0
 flist = []
-tohash = []
 start = time.time()
 
 temp = os.walk(sys.argv[1], topdown=False)
@@ -19,26 +20,39 @@ for root, dirs, files in temp:
         fsize.append(os.path.join(root,i))
         fsize.append(os.stat(os.path.join(root,i)).st_size)
         flist.append(fsize)
-
 flist.sort(key=itemgetter(1))
-for a in range(len(flist)-1): 
-    if flist[::1][a][1] == flist[::1][a+1][1]:
-        nlist = []
-        nlist.append(flist[::1][a][0])
-        with open (flist[::1][a][0], "rb") as chunk:
-            header=chunk.read(1024)
-        nlist.append(header)
-        tohash.append(nlist)
-        count+=1
-        print('\r' + 'Equal size files: {}'.format(str(count)), end='')
-        #print('file {} = {}'.format(flist[::1][a][0], flist[::1][a+1][0]))
-for b in range(len(tohash)-1): 
-    if tohash[::1][b][1] == tohash[::1][b+1][1]:
-        count2+=1
-        print('\r' + 'Equal chunk size files: {}'.format(str(count2)), end='')
-        #print('found chunk {} is equal to this file {}'.format(tohash[::1][b][0], tohash[::1][b+1][0]))
-        
-#msec = round(1000 / avg, 4)
-print('\nTotal duplicates based on file size - {}'.format(count))
-print('Total duplicates based on first 1024 bytes - {}'.format(count2))
+#print (flist)   #[['E:\\photos\\IMG 1826.jpg', 49818], ['E:\\photos\\IMG 1833.jpg', 49353]...]
+
+#compare second indexes from nested list and create potential list of duplicates
+def compare(some_list):
+    nlist = []
+    nlist.append([])
+    index_num = -1
+    for a in range(len(some_list)-1):
+        if some_list[::1][a][1] == some_list[::1][a+1][1]:
+            index_num+=1
+            nlist[0].append(some_list[::1][a][0])
+            nlist[0].append(some_list[::1][a+1][0])
+    #print(nlist)    #[['E:\\photos\\IMG 1860 - Copy.jpg', 'E:\\photos\\IMG 1860.jpg', 'E:\\photos\\IMG 1873 - Copy.jpg', 'E:\\photos\\IMG 1873(2).jpg', 'E:\\photos\\IMG 1873(2).jpg', 'E:\\photos\\IMG 1873.jpg', 'E:\\photos\\IMG 1826 - Copy.jpg', 'E:\\photos\\IMG 1826.jpg']]
+    return nlist
+
+lister = compare(flist)
+
+lister.append([])
+for c in range(len(lister[0])):
+    with open (lister[0][c], "rb") as chunk:
+        header=chunk.read(10)
+    lister[1].append(header)
+#print(lister)
+
+tohash = []
+for g in range(len(lister[0])):
+    tohash_row = []
+    for row in lister:
+        tohash_row.append(row[g])
+    tohash.append(tohash_row)
+print(tohash)
+
+print('\nTotal duplicates based on file size - {}'.format('TODO'))
+print('Total duplicates based on first 1024 bytes - {}'.format('TODO'))
 print('Found in {} seconds'.format(round(time.time()-start, 2)))

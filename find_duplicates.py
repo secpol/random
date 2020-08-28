@@ -14,21 +14,20 @@ def compare(some_list, chunk_hash: bool):
             nlist[0].append(some_list[::1][a][0])
             nlist[0].append(some_list[::1][a+1][0])
     rem_dupas = [list(set(lst)) for lst in nlist] #remove duplicate paths
-    #print(nlist)    #[['E:\\photos\\IMG 1860 - Copy.jpg', 'E:\\photos\\IMG 1860.jpg', 'E:\\photos\\IMG 1873 - Copy.jpg', 'E:\\photos\\IMG 1873(2).jpg', 'E:\\photos\\IMG 1873(2).jpg', 'E:\\photos\\IMG 1873.jpg', 'E:\\photos\\IMG 1826 - Copy.jpg', 'E:\\photos\\IMG 1826.jpg']]
+
     rem_dupas.append([])
     for b in range(len(rem_dupas[0])):
         with open (rem_dupas[0][b], "rb") as data:
-            #print(rem_dupas[0][b])
             if chunk_hash:
                 output=data.read(1024)
             else:
-                data1=data.read()
-                output=hashlib.sha1(data1).hexdigest()
+                data=data.read(8192)
+                output=hashlib.sha1(data).hexdigest()
         rem_dupas[1].append(output)
 
     return rem_dupas
 
-#merge file path with file header/hash(TODO)
+#merge file path with file header/hash
 def merge(another_list):
     merge = []
     for t in range(len(another_list[0])):
@@ -39,7 +38,8 @@ def merge(another_list):
     merge.sort(key=itemgetter(1))
     return merge
 
-sys.argv.append('M:\\docs\\')
+
+sys.argv.append('E:\\photos\\')
 flist=[]
 start=time.time()
 temp=os.walk(sys.argv[1], topdown=False)
@@ -51,7 +51,6 @@ for root, dirs, files in temp:
         fsize.append(os.stat(os.path.join(root,i)).st_size)
         flist.append(fsize)
 flist.sort(key=itemgetter(1))
-
 
 print('\nTotal duplicates based on file size - {}'.format(len(compare(flist, True)[0])))
 print('Total duplicates based on first 1024 bytes - {}'.format(len(merge(compare(flist, True)))))

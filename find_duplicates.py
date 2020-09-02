@@ -1,65 +1,46 @@
 import os, sys, io
 import os.path
-from itertools import repeat
 import hashlib
 import time
 
-#compare second indexes from nested list and create potential list of duplicates
-#then remove duplicate paths
 def compare(some_list):
-    nlist=[]
-    nlist.append([])
+    list1=[]
+    list2=[]
     for a in range(len(some_list)-1):
-        if some_list[a][1] == some_list[a+1][1]: 
-            nlist[0].append(some_list[a][0])
-            nlist[0].append(some_list[a+1][0])
-    nlist = [list(set(lst)) for lst in nlist]
+        if some_list[a][1] == some_list[a+1][1] and some_list[a][0] != some_list[a+1][0]: 
+            list1.append(some_list[a][0])
+            list2.append(some_list[a+1][0])
+    paths = list(zip(list1,list2))
 
-    return nlist
+    return paths
 
-#get 1024/8192 bytes chunk of file, hash it and/or append it to the list
-def chunk_hash(get_list, sel: bool):  
-    get_list.append([])
-    for b in range(len(get_list[0])):
-        with open (get_list[0][b], "rb") as data:
-            if sel:
-                if b == 0:
+def chunk_hash(lista, switch: bool):
+    list3=[]
+    list4=[]
+    for i,j in lista:
+        list3.append(i)
+        list3.append(j)
+        with open(i, "rb") as data1, open(j, "rb") as data2:
+            if switch:
+                if len(list3) == 2:
                     print('\rProccessing 1024 bytes chunk...')
-                output=data.read(1024)
+                out1=data1.read(1024)
+                out2=data2.read(1024)
             else:
-                if b == 0:
+                if len(list3) == 2:
                     print('\rProccessing 8196 bytes hash...')
-                data=data.read(8192)
-                output=hashlib.sha1(data).hexdigest()
-        get_list[1].append(output)
+                data1=data1.read(8192)
+                data2=data2.read(8192)
+                out1=hashlib.sha1(data1).hexdigest()
+                out2=hashlib.sha1(data2).hexdigest()
+        list4.append(out1)
+        list4.append(out2)
+    seq=list(zip(list3,list4))
+    seq.sort(key=lambda elem: elem[1])
 
-    return get_list
+    return seq
 
-#merge file path with file byte chunk/hash
-def merge(another_list):
-    merge = []
-    for t in range(len(another_list[0])):
-        merge_row = []
-        for row in another_list:
-            merge_row.append(row[t])
-        merge.append(merge_row)
-    merge.sort(key=lambda elem: elem[1])
-
-    return merge
-
-def wrapper(hashed):
-    for duplicate in range(len(hashed)):
-        if duplicate % 2 == 0:
-            try:
-                x1 = hashed[duplicate][0]
-                x2 = hashed[duplicate+1][0]
-            except IndexError:
-                pass
-            #print('Duplicate file found: {} ---> {}'.format(x1, x2))
-            #with io.open('duplicates.txt', "a", encoding="utf-8") as f:
-            #    f.write('Duplicate file found: {} ---> {}'.format(x1, x2)+'\n')
-
-sys.argv.append('M:\\photos\\')
+sys.argv.append('F:\\photos\\')
 
 flist=[]
 count=0
@@ -76,14 +57,22 @@ for root, dirs, files in temp:
         print('\r' + 'File progress: {}'.format(count), end='')
 flist.sort(key=lambda elem: elem[1])
 
-size_list = compare(flist)
-size_list = merge(chunk_hash(size_list, True))
-hash_list = compare(size_list)
-hash_list = merge(chunk_hash(hash_list, False))
-wrapper(hash_list) 
+comp1 = compare(flist)            
+xc=chunk_hash(comp1, True)
+comp2=compare(xc)
+xh=chunk_hash(comp2, False)
+comp3=compare(xh)
+comp3.sort()
 
-print('\nTotal duplicates based on file size - {}'.format(len(compare(flist)[0])))
-print('Total duplicates based on first 1024 bytes - {}'.format(len(size_list)))
-print('Total duplicates based on hash - {}'.format(len(hash_list)))
+print('\nTotal duplicates based on file size - {}'.format(len(comp1)*2))
+print('Total duplicates based on first 1024 bytes - {}'.format(len(comp2)))
+print('Total duplicates based on hash - {}'.format(len(comp3)))
 print('Total files scanned - {}'.format(count))
 print('Found in {} seconds'.format(round(time.time()-start, 2)))
+
+c=0
+for o,p in comp3:
+    #if o != p:
+    c+=1
+    with io.open('log5.txt', "a", encoding="utf-8") as f:
+        f.write('{:05n} -- Duplicate file found: {} ---> {}'.format(c,o,p)+'\n')

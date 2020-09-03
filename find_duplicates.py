@@ -20,19 +20,26 @@ def chunk_hash(lista, switch: bool):
     for i,j in lista:
         list3.append(i)
         list3.append(j)
-        with open(i, "rb") as data1, open(j, "rb") as data2:
-            if switch:
-                if len(list3) == 2:
-                    print('\rProccessing 1024 bytes chunk...')
-                out1=data1.read(1024)
-                out2=data2.read(1024)
-            else:
-                if len(list3) == 2:
-                    print('\rProccessing 8196 bytes hash...')
-                data1=data1.read(8192)
-                data2=data2.read(8192)
-                out1=hashlib.sha1(data1).hexdigest()
-                out2=hashlib.sha1(data2).hexdigest()
+        try:
+            with open(i, "rb") as data1, open(j, "rb") as data2:
+                if switch:
+                    if len(list3) == 2:
+                        print('\rProccessing 1024 bytes chunk...')
+                    out1=data1.read(1024)
+                    out2=data2.read(1024)
+                else:
+                    if len(list3) == 2:
+                        print('\rProccessing 8196 bytes hash...')
+                    data1=data1.read(8192)
+                    data2=data2.read(8192)
+                    out1=hashlib.sha1(data1).hexdigest()
+                    out2=hashlib.sha1(data2).hexdigest()
+        except PermissionError as permission:
+            print(permission)
+            pass
+        except OSError as syserror:
+            print(syserror)
+            pass
         list4.append(out1)
         list4.append(out2)
     seq=list(zip(list3,list4))
@@ -40,12 +47,15 @@ def chunk_hash(lista, switch: bool):
 
     return seq
 
-sys.argv.append('F:\\photos\\')
+
+val=input('Type drive letter or path, eg. D:/, D:/docs\n')
+while not os.path.isdir(val):
+    val=input('Wrong input, try again\n')
 
 flist=[]
 count=0
 start=time.time()
-temp=os.walk(sys.argv[1], topdown=False)
+temp=os.walk(val, topdown=False)
 
 for root, dirs, files in temp:
     for i in files:
@@ -57,6 +67,8 @@ for root, dirs, files in temp:
         print('\r' + 'File progress: {}'.format(count), end='')
 flist.sort(key=lambda elem: elem[1])
 
+animate = '|/-\\'
+idx = 0
 comp1 = compare(flist)            
 xc=chunk_hash(comp1, True)
 comp2=compare(xc)
@@ -74,5 +86,8 @@ c=0
 for o,p in comp3:
     #if o != p:
     c+=1
-    with io.open('log5.txt', "a", encoding="utf-8") as f:
+    with io.open('log7.txt', 'a', encoding='utf-8') as f:
         f.write('{:05n} -- Duplicate file found: {} ---> {}'.format(c,o,p)+'\n')
+    print('Saving ',animate[idx % len(animate)], end='\r')
+    idx += 1
+print('\nDone!')

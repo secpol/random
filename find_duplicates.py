@@ -48,7 +48,7 @@ def chunk_hash(lista, switch: bool):
     return seq
 
 
-val=input('Type drive letter or path, eg. D:/, D:/docs\n')
+val=input('Type path, eg. D:/, /home/user\n')
 while not os.path.isdir(val):
     val=input('Wrong input, try again\n')
 
@@ -67,8 +67,8 @@ for root, dirs, files in temp:
         print('\r' + 'File progress: {}'.format(count), end='')
 flist.sort(key=lambda elem: elem[1])
 
-animate = '|/-\\'
-idx = 0
+#animate = '|/-\\'
+#idx = 0
 comp1 = compare(flist)            
 xc=chunk_hash(comp1, True)
 comp2=compare(xc)
@@ -83,11 +83,9 @@ print('Total files scanned - {}'.format(count))
 print('Found in {} seconds'.format(round(time.time()-start, 2)))
 
 c=0
+f = io.open('log7.txt', 'a', encoding='utf-8')
 for o,p in comp3:
-    #if o != p:
     c+=1
-    with io.open('log7.txt', 'a', encoding='utf-8') as f:
-        f.write('{:05n} -- Duplicate file found: {} ---> {}'.format(c,o,p)+'\n')
-    print('Saving ',animate[idx % len(animate)], end='\r')
-    idx += 1
+    f.write('{:05n} -- Duplicate file found: {} ---> {}'.format(c,o,p)+'\n')
+f.close()
 print('\nDone!')

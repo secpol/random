@@ -4,6 +4,14 @@ import hashlib
 import time
 
 def compare(some_list):
+
+    ''' Take a nested list/list of tuples, compare second index from each nested list,
+    if it is the same and when first index is different, 
+    then append first index to the first list and append second index to the second list.
+    Zip them together to create list of tuples.
+    Format: [(path1, path2), (path3, path4)] where tuple is an object of equal values.
+    '''
+
     list1=[]
     list2=[]
     for a in range(len(some_list)-1):
@@ -15,6 +23,11 @@ def compare(some_list):
     return paths
 
 def chunk_hash(lista, switch: bool):
+
+    ''' For every first and second index in tuple, read first 1024 bytes of file to sompare header or 8096 bytes to compare hash.
+    TODO: read last bytes of the file
+    '''
+
     list3=[]
     list4=[]
     for i,j in lista:
@@ -67,8 +80,6 @@ for root, dirs, files in temp:
         print('\r' + 'File progress: {}'.format(count), end='')
 flist.sort(key=lambda elem: elem[1])
 
-#animate = '|/-\\'
-#idx = 0
 comp1 = compare(flist)            
 xc=chunk_hash(comp1, True)
 comp2=compare(xc)
@@ -83,7 +94,7 @@ print('Total files scanned - {}'.format(count))
 print('Found in {} seconds'.format(round(time.time()-start, 2)))
 
 c=0
-f = io.open('log7.txt', 'a', encoding='utf-8')
+f = io.open('log.txt', 'a', encoding='utf-8')
 for o,p in comp3:
     c+=1
     f.write('{:05n} -- Duplicate file found: {} ---> {}'.format(c,o,p)+'\n')
